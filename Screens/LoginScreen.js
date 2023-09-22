@@ -10,9 +10,10 @@ import {
 	Keyboard,
 } from 'react-native'
 
-export default LoginScreen = () => {
+export default function LoginScreen() {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+
 	const handleLogin = () => {
 		console.log('Email:', email)
 		console.log('Password:', password)
@@ -52,7 +53,10 @@ const styles = StyleSheet.create({
 		justifyContent: 'flex-end',
 	},
 	innerContainer: {
-		height: 489,
+		paddingTop: 32,
+		paddingLeft: 16,
+		paddingRight: 16,
+		paddingBottom: 144,
 		justifyContent: 'center',
 		alignItems: 'center',
 		borderRadius: 25,
@@ -61,7 +65,6 @@ const styles = StyleSheet.create({
 	heading: {
 		color: '#212121',
 		textAlign: 'center',
-		// fontFamily: 'Roboto_Regular',
 		fontSize: 30,
 		fontStyle: 'normal',
 		fontWeight: 500,

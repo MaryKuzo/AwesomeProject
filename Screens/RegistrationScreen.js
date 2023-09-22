@@ -29,40 +29,41 @@ export default function RegistrationScreen() {
         behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
         enabled>
         <View style={styles.innerContainer}>
-           <View style={styles.avatarContainer}>
-                <TouchableOpacity>
-                  <View style={styles.iconContainer}>
-                    <Ionicons name="ios-add" size={13} color="#FF6C00" />
-                  </View>
-                </TouchableOpacity>
+          <View style={styles.avatarContainer}>
+            <TouchableOpacity>
+              <View style={styles.iconContainer}>
+                <Ionicons name="ios-add" size={13} color="#FF6C00" />
               </View>
-					<Text style={styles.heading}>Реєстрація</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.heading}>Реєстрація</Text>
           <TextInput style={styles.input}
             placeholder='Логін'
             value={name}
             onChangeText={setName} />
-					<TextInput
-						style={styles.input}
-						placeholder='Адреса електронної пошти'
-						value={email}
-						onChangeText={setEmail}
-					/>
-					<TextInput
-						style={styles.input}
-						placeholder='Пароль'
-						secureTextEntry
-						value={password}
-						onChangeText={setPassword}
-					/>
-					<TouchableOpacity style={styles.button} onPress={handleRegistration}>
-						<Text style={styles.buttonText}>Зареєструватися</Text>
-					</TouchableOpacity>
-					<Text style={styles.span}>Вже є акаунт? Увійти</Text>
-				</View>
-			</KeyboardAvoidingView>
-		</TouchableWithoutFeedback>
+          <TextInput
+            style={styles.input}
+            placeholder='Адреса електронної пошти'
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder='Пароль'
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleRegistration}>
+            <Text style={styles.buttonText}>Зареєструватися</Text>
+          </TouchableOpacity>
+          <Text style={styles.span}>Вже є акаунт? Увійти</Text>
+        </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
 	)
 }
+
 
 const styles = StyleSheet.create({
 	container: {
@@ -136,4 +137,3 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 	},
 })
-
