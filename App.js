@@ -1,35 +1,44 @@
-import React, { useEffect, useState } from 'react'
-import * as Font from 'expo-font'
-import { ImageBackground, StyleSheet, View } from 'react-native'
-import RegistrationScreen from './Screens/RegistrationScreen'
-import LoginScreen from './Screens/LoginScreen'
+import 'react-native-gesture-handler';
+import React, { useEffect, useState } from 'react';
+import * as Font from 'expo-font';
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import  LoginScreen  from './Screens/LoginScreen';
+import RegistrationScreen from './Screens/RegistrationScreen';
+import Home from './Screens/Home'; 
+import PostsScreen from './Screens/PostsScreen';
+
+const Stack = createStackNavigator();
+
 
 export default function App() {
-	useEffect(() => {
-		async function loadFonts() {
-			await Font.loadAsync({
-				Roboto_Regular: require('./assets/fonts/Roboto-Regular.ttf'),
-				Roboto_Bold: require('./assets/fonts/Roboto-Medium.ttf'),
-			})
-		}
-		loadFonts()
-	}, [])
-	return (
-		<View style={styles.container}>
-			<ImageBackground source={require('./assets/img/registration_bckg.jpg')} resizeMode='cover' style={styles.image}>
-				<RegistrationScreen />
-				{/* <LoginScreen /> */}
-			</ImageBackground>
-		</View>
-	)
-}
+  const [fontsLoaded, setFontsLoaded] = useState(false); 
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	image: {
-		flex: 1,
-		justifyContent: 'flex-end',
-	},
-})
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Roboto_Regular': require('./assets/fonts/Roboto-Regular.ttf'),
+        'Roboto_Bold': require('./assets/fonts/Roboto-Medium.ttf'),
+      });
+      setFontsLoaded(true); 
+    }
+
+    loadFonts();
+  }, []);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  return (
+    <NavigationContainer>
+    <Stack.Navigator initialRouteName="Login">
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Registration" component={RegistrationScreen} />
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Posts" component={PostsScreen} />
+       
+    </Stack.Navigator>
+  </NavigationContainer>
+  );
+}
