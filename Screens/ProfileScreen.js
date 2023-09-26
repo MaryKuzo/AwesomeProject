@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import {Background} from '../components/Background'
 
 import {
   View,
@@ -15,10 +16,8 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        style={styles.imgBackground}
-        source={require("../assets/img/registration_bckg.jpg")}
-      >
+      <Background>
+      
         <View style={styles.formContainer}>
           <View style={styles.avatarContainer}>
             <Image
@@ -41,9 +40,9 @@ const ProfileScreen = () => {
             <Ionicons name="ios-exit-outline" size={24} color="#bdbdbd" />
           </View>
         </TouchableOpacity>
-          <Text style={styles.header}>Наталі Романова</Text>
+          <Text style={styles.header}>Natalia Romanova</Text>
         </View>
-      </ImageBackground>
+        </Background>
     </View>
   );
 };
