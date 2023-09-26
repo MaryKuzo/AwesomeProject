@@ -14,7 +14,10 @@ const Tabs = createBottomTabNavigator();
 const Home = () => {
   return (
     <Tabs.Navigator
+  
       screenOptions={({ route }) => ({
+        headerShown: true,
+        headerTitle: route.name,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
