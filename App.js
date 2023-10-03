@@ -54,7 +54,7 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="CommentsScreen"
+          name="Comments"
           component={CommentsScreen}
           options={{ headerShown: false }}
         />
