@@ -8,6 +8,7 @@ const PostsScreen = () => {
   const route = useRoute();
 
   const photo = route.params?.photo;
+  
 
   return (
     <View style={styles.container}>

@@ -38,7 +38,7 @@ const CommentsScreen = () => {
   const [newComment, setNewComment] = useState("");
 
   const route = useRoute();
-  const { photo } = route.params || {};
+  const { imageUri } = route.params || {};
   const navigation = useNavigation();
 
   const handleAddComment = () => {
@@ -82,6 +82,10 @@ const CommentsScreen = () => {
               </View>
             </TouchableOpacity>
           </View>
+          <View style={styles.photoContainer}>
+  <Image source={{ uri: imageUri }} style={styles.photo} />
+</View>
+
       <ScrollView style={styles.commentsContainer}>
         <ScrollView style={styles.commentsList}>
           {comments.map((comment, index) => (

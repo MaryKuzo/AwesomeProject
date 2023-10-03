@@ -96,6 +96,8 @@ export default function App() {
         selectedAssets.forEach((asset) => {
           setImage(asset.uri);
           reverseGeocode();
+          navigation.navigate('CommentsScreen', { imageUri: selectedImageUri });
+        
         });
       }
     }
@@ -118,8 +120,16 @@ export default function App() {
         setImage(null);
         setPhotoLocation("");
         setAddress("");
-
+  
+    
         navigation.navigate("Posts", {
+          photo: {
+            uri: asset.uri,
+            photoName,
+            location: albumName,
+          },
+        });
+        navigation.navigate("CommentsScreen", {
           photo: {
             uri: asset.uri,
             photoName,
@@ -311,6 +321,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 55,
     backgroundColor: "#ffffff",
+  },
+  photoContainer: {
+    alignItems: "center",
+    marginBottom: 32,
   },
   headerContainer: {
     borderBottomWidth: 1,
