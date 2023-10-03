@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   textBasic: {
-    fontFamily: "Roboto-Regular",
+    fontFamily: "Roboto_Regular",
     fontSize: 16,
   },
   button: {

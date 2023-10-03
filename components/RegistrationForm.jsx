@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   StyleSheet,
   Text,
@@ -11,6 +12,10 @@ import { Formik } from "formik";
 export default function RegistrationForm() {
   const [focus, setFocus] = useState("");
   const [hidePass, setHidePass] = useState(true);
+  const navigation = useNavigation();
+  const handleRegistration = () => {
+    navigation.navigate("Home");
+  };
 
   return (
     <Formik
@@ -76,7 +81,7 @@ export default function RegistrationForm() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={props.handleSubmit}>
+          <TouchableOpacity style={styles.button} onPress={handleRegistration}>
             <Text style={[styles.textBasic, styles.textButton]}>
               Зареєструватися
             </Text>
@@ -110,7 +115,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   textBasic: {
-    fontFamily: "Roboto-Regular",
+    fontFamily: "Roboto_Regular",
     fontSize: 16,
   },
   button: {

@@ -19,13 +19,14 @@ const Home = () => {
 
           if (route.name === "Posts") {
             iconName = focused ? "ios-grid" : "ios-grid-outline";
-            color = focused ? "#FF6C00" : "rgba(33, 33, 33, 0.80)";
+            color = "rgba(33, 33, 33, 0.80)";
           } else if (route.name === "Create") {
             iconName = focused ? "ios-add-outline" : "ios-add";
-            color = "white";
+            color = focused ? 'white' : 'rgba(33, 33, 33, 0.80)';
+            backgroundColor = focused ? "#FF6C00" : "rgba(33, 33, 33, 0.80)";
           } else if (route.name === "Profile") {
              iconName = focused ? "ios-person-sharp" : "ios-person-outline";
-             color = focused ? "#FF6C00" : "rgba(33, 33, 33, 0.80)";
+             color =  "rgba(33, 33, 33, 0.80)";
           }
           return <Ionicons name={iconName} size={24} color={color} />;
         },
@@ -56,8 +57,10 @@ const Home = () => {
             const customStyles = {
               backgroundColor: props.accessibilityState.selected
                 ? "#FF6C00" 
-                : "#FF6C00",  
+                : "white",  
               borderRadius: 100,
+              borderWidth: props.accessibilityState.selected ? 0: 1, 
+              borderColor: props.accessibilityState.selected ? "#FF6C00" : "rgba(33, 33, 33, 0.80)", 
               paddingVertical: 8,
               width: 70,
               color: "#ffffff",

@@ -82,13 +82,13 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   textHeader: {
-    fontFamily: "Roboto-Medium",
+    fontFamily: "Roboto_Bold",
     fontSize: 30,
     textAlign: "center",
     marginTop: 72,
   },
   textBasic: {
-    fontFamily: "Roboto-Regular",
+    fontFamily: "Roboto_Regular",
     fontSize: 16,
   },
   textDesc: {
