@@ -96,7 +96,13 @@ export default function App() {
         selectedAssets.forEach((asset) => {
           setImage(asset.uri);
           reverseGeocode();
-          navigation.navigate('CommentsScreen', { imageUri: selectedImageUri });
+          navigation.navigate('Comments', {
+            photo: {
+              uri: asset.uri,
+              photoName,
+              location: albumName,
+            },
+          });
         
         });
       }
@@ -129,13 +135,7 @@ export default function App() {
             location: albumName,
           },
         });
-        navigation.navigate("CommentsScreen", {
-          photo: {
-            uri: asset.uri,
-            photoName,
-            location: albumName,
-          },
-        });
+
       } catch (error) {
         console.log(error);
       }
