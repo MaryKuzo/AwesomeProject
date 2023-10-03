@@ -14,7 +14,7 @@ const PostsScreen = () => {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <View>
-          <Text style={styles.text}>Публікації</Text>
+          <Text style={styles.textHeader}>Публікації</Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
           <View style={styles.iconContainer}>
@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#BDBDBD",
     paddingHorizontal: 10,
+    paddingTop:30,
   },
   content: {
     paddingHorizontal: 16,
@@ -122,6 +123,14 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto_Regular",
     fontSize: 11,
     color: "rgba(33, 33, 33, 0.80)",
+  }, 
+  textHeader: {
+    fontFamily: "Roboto_Bold",
+    fontSize: 17,
+    color: "#212121",
+    textAlign: "center",
+    paddingBottom: 11,
+    
   },
   text: {
     fontFamily: "Roboto_Bold",
