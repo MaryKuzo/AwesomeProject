@@ -87,7 +87,7 @@ const CommentsScreen = () => {
   {photo && photo.uri ? (
     <Image
       source={{ uri: photo.uri }}
-      style={{ width: "100%", height: 240 }}
+      style={styles.photo}
     />
   ) : (
     <Text style={styles.textEmpty}>Ще немає жодного фото</Text>
@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 8,
     position: "relative",
+    marginTop: 32
   },
   commentsContainer: {
     flex: 1,
