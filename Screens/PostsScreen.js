@@ -45,7 +45,7 @@ const PostsScreen = () => {
             />
             <Text style={styles.text}>{photo.photoName}</Text>
             <View style={styles.description}>
-              <TouchableOpacity onPress={() => navigation.navigate("Comments")}>
+              <TouchableOpacity onPress={() => navigation.navigate("Comments", { photo })}>
                 <View style={styles.iconComments}>
                   <Ionicons
                     name="ios-chatbubble-outline"

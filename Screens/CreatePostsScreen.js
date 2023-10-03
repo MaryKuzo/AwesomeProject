@@ -49,6 +49,7 @@ export default function App() {
         const data = await cameraRef.current.takePictureAsync();   
         setImage(data.uri);
         reverseGeocode();
+       
       } catch (error) {
         console.log(error);
       }
@@ -98,9 +99,9 @@ export default function App() {
           reverseGeocode();
           navigation.navigate('Comments', {
             photo: {
-              uri: asset.uri,
+              uri: asset.uri, // Pass the URI of the selected image
               photoName,
-              location: albumName,
+              location: photoLocation || address,
             },
           });
         
@@ -165,7 +166,7 @@ export default function App() {
       <View style={styles.container}>
         <ScrollView style={{ flex: 1 }}>
           <View style={styles.headerContainer}>
-            <View>
+            <View onPress={() => navigateToComments()}>
               <Text style={styles.text}>Створити публікацію</Text>
             </View>
 
