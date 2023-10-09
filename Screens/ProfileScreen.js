@@ -1,117 +1,228 @@
-import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
-import {Background} from '../components/Background'
-
+import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Image,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  Text,
+  FlatList,
+  SafeAreaView,
+  RefreshControl,
 } from "react-native";
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import UserPhoto from "../components/UserPhoto";
+import { useDispatch } from "react-redux";
+import { usePost, useUser } from "../hooks/index.js";
+import {
+  addLikeThunk,
+  deleteLikeThunk,
+  getMyPostThunk,
+} from "../redux/posts/postOperations";
+import { auth } from "../redux/config";
+import { updatePage } from "../helpers/index";
+import ButtonLogOut from "../components/ButtonLogOut";
+import PostForm from "../components/PostForm";
 
 const ProfileScreen = () => {
+  const [update, setUpdate] = useState(false);
+  const { user } = useUser();
+  const dispatch = useDispatch();
   const navigation = useNavigation();
+  const { myPosts } = usePost();
+
+  useEffect(() => {
+    dispatch(getMyPostThunk());
+  }, [dispatch]);
+
+  const fetchMyPosts = async () => {
+    setUpdate(true);
+    try {
+      await dispatch(getMyPostThunk());
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+    setUpdate(false);
+  };
+
+  const addLike = async (id, likes) => {
+    const value = (likes += 1);
+    dispatch(addLikeThunk({ id, value }));
+
+    updatePage(id, () => {
+      dispatch(getMyPostThunk());
+    });
+  };
+
+  const deleteLike = async (id, likes) => {
+    const value = (likes -= 1);
+    dispatch(deleteLikeThunk({ id, value }));
+
+    updatePage(id, () => {
+      dispatch(getMyPostThunk());
+    });
+  };
+
+  const uid = auth.currentUser ? auth.currentUser.uid : null;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchMyPosts();
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
-      <Background>
-      
-        <View style={styles.formContainer}>
-          <View style={styles.avatarContainer}>
-            <Image
-              source={require("../assets/img/avatar.jpg")} 
-              style={styles.avatarImage}
-              resizeMode="cover"       
-            />
-            <TouchableOpacity style={styles.iconContainer}>
-              <View >
-              <Ionicons name="ios-close" size={13} color="#bdbdbd" />
-              </View>
-              
-            </TouchableOpacity>
+      <ImageBackground
+        style={styles.backgroundImage}
+        source={require("../assets/img/registration_bckg.jpg")}
+      >
+        <SafeAreaView style={styles.safeContainer}>
+          <View style={styles.profileContainer}>
+            <UserPhoto />
+            <View style={styles.containerLogOut}>
+              <ButtonLogOut />
+            </View>
+            {user && <Text style={styles.name}>{user.displayName}</Text>}
+            <PostForm/>
           </View>
-
-        <TouchableOpacity 
-        style={styles.logoutContainer} 
-        onPress={() => navigation.navigate("Login")}>
-        <View>
-            <Ionicons name="ios-exit-outline" size={24} color="#bdbdbd" />
-          </View>
-        </TouchableOpacity>
-          <Text style={styles.header}>Natalia Romanova</Text>
-        </View>
-        </Background>
+        </SafeAreaView>
+      </ImageBackground>
     </View>
   );
 };
 
-export default ProfileScreen;
-
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  formContainer: {
-    position: "relative",
-    justifyContent: "center",
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingTop: 92,
-    paddingBottom: 8,
-    backgroundColor: "#ffffff",
-    borderTopRightRadius: 25,
-    borderTopLeftRadius: 25,
-    marginBottom: 0,
-  },
-  imgBackground: {
+  container: {
     flex: 1,
-    resizeMode: "contain",
+    position: "relative",
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover",
     justifyContent: "flex-end",
   },
-  avatarContainer: {
+  safeContainer: {
     flex: 1,
-    position: "absolute",
-    width: 120,
-    height: 120,
-    backgroundColor: "#f6f6f6",
-    borderRadius: 16,
-    top: -60,
-    left: "50%",
-    marginLeft: -48,
-    overflow: 'hidden',
   },
-  avatarImage: {
-    margin: 0,
-    padding: 0,
-    height: '100%',
-    borderRadius: 16, 
+  profileContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    position: "relative",
+    marginTop: 147,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
   },
-  iconContainer: {
-    position: "absolute",
-    top: 80,
-    right: -9,
-    backgroundColor: "#ffffff",
-    borderRadius: 100,
-    borderColor: "#bdbdbd",
-    borderWidth: 1,
-    width: 25,
-    height: 25,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  
+  containerLogOut: {
+    alignSelf: "flex-end",
+    top: -102,
   },
-  logoutContainer: {
-    position: "absolute",
-    width: 25,
-    height: 25,
-    top: 22,
-    right: 16,
-  },
-  header: {
-    fontFamily: "Roboto_Bold",
-    fontSize: 30,
+  name: {
     color: "#212121",
     textAlign: "center",
+    fontFamily: "Roboto_Bold",
+    fontSize: 30,
+    fontStyle: "normal",
+    fontWeight: "500",
+    letterSpacing: 0.3,
     marginBottom: 33,
+    marginTop: -52,
+  },
+  publicationsContainer: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+  },
+  publicationContainer: {
+    width: "100%",
+    marginBottom: 23,
+  },
+  photo: {
+    width: "100%",
+    height: 240,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  publicationName: {
+    color: "#212121",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "500",
+    marginBottom: 10,
+  },
+  publicationDataContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 35,
+  },
+  publicationIconContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: 24,
+  },
+  publicationCommentContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: 6,
+    alignItems: "center",
+  },
+  count: {
+    color: "#212121",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+  },
+  iconGray: {
+    color: "#BDBDBD",
+  },
+  countZero: {
+    color: "#BDBDBD",
+  },
+  publicationLikeContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: 6,
+    alignItems: "center",
+  },
+  icon: {
+    color: "#FF6C00",
+  },
+  likeCount: {
+    color: "#212121",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+  },
+  publicationLocationContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    flexShrink: 1,
+    alignItems: "center",
+  },
+  iconLocation: {
+    color: "#BDBDBD",
+  },
+  location: {
+    color: "#212121",
+    textAlign: "right",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+    textDecorationLine: "underline",
+    flexShrink: 1,
   },
 });
+
+export default ProfileScreen;
