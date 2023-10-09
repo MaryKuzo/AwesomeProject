@@ -1,100 +1,90 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
 
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,   
+  Image,
+} from "react-native";
+import { usePost, useUser } from "../hooks/index";
+import { useDispatch } from "react-redux";
+import {
+  getAllPostsThunk,
+} from "../redux/posts/postOperations";
+import { Ionicons } from "@expo/vector-icons";
+import PostForm from "../components/PostForm";
 
 const PostsScreen = () => {
+  const [update, setUpdate] = useState(false);
   const navigation = useNavigation();
-  const route = useRoute();
+  const dispatch = useDispatch();
+  const { user } = useUser();
+  const { allPosts } = usePost();
 
-  const photo = route.params?.photo;
-  
+  useEffect(() => {
+    dispatch(getAllPostsThunk());
+  }, [dispatch]);
+
+  const fetchAllPosts = async () => {
+    setUpdate(true);
+    try {
+      await dispatch(getAllPostsThunk());
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+    setUpdate(false);
+  };
+
+
+  // const uid = auth.currentUser ? auth.currentUser.uid : null;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAllPosts();
+    }, [])
+  );
 
   return (
+   <>
+
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View>
-          <Text style={styles.textHeader}>Публікації</Text>
-        </View>
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <View style={styles.iconContainer}>
-            <Ionicons name="ios-exit-outline" size={24} color="#bdbdbd" />
-          </View>
-        </TouchableOpacity>
+    <View style={styles.headerContainer}>
+      <View>
+        <Text style={styles.textHeader}>Публікації</Text>
       </View>
-
-      <View style={styles.content}>
-        <View style={styles.user}>
-          <View style={styles.avatar}>
-            <Image
-              source={require("../assets/img/avatar.jpg")}
-              style={{ width: 60, height: 60, borderRadius: 16 }}
-            />
-          </View>
-          <View style={styles.textUserContainer}>
-            <Text style={styles.textName}>Natalia Romanova</Text>
-
-            <Text style={styles.textЕmail}>email@example.com</Text>
-          </View>
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="ios-exit-outline" size={24} color="#bdbdbd" />
         </View>
-        {photo && photo.uri ? (
-          <>
-            <Image
-              source={{ uri: photo.uri }}
-              style={{ width: "100%", height: 240 }}
-            />
-            <Text style={styles.text}>{photo.photoName}</Text>
-            <View style={styles.description}>
-              <TouchableOpacity onPress={() => navigation.navigate("Comments", { photo })}>
-                <View style={styles.iconComments}>
-                  <Ionicons
-                    name="ios-chatbubble-outline"
-                    size={24}
-                    color="#bdbdbd"
-                  />
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  console.log("locationMap", photo.location);
-                  navigation.navigate("Map", { location: photo.location });
-                }}
-              >
-                <View style={styles.location}>
-                  <Ionicons
-                    name="ios-location-outline"
-                    size={24}
-                    color="#bdbdbd"
-                  />
-                  <Text>{photo.location}</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </>
+      </TouchableOpacity>
+      </View>
+      <View style={styles.userContainer}>
+        {user && user.photoURL ? (
+          <Image source={{ uri: user.photoURL }} style={styles.avatar}></Image>
         ) : (
-          <>
-            <Text style={styles.textEmpty}>Ще немає жодного фото</Text>
-            {/* <TouchableOpacity onPress={() => navigation.navigate("Comments")}>
-              <View style={styles.iconComments}>
-                <Ionicons
-                  name="ios-chatbubble-outline"
-                  size={24}
-                  color="#bdbdbd"
-                />
-              </View>
-            </TouchableOpacity> */}
-          </>
+          <View style={styles.withoutAvatar}></View>
+        )}
+        {user && (
+          <View>
+            <Text style={styles.userName}>{user.displayName}</Text>
+            <Text style={styles.email}>{user.email}</Text>
+          </View>
         )}
       </View>
+      <PostForm/>
     </View>
+    </>
   );
 };
 
-export default PostsScreen;
-
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 55,
+    flex: 1,
+    backgroundColor: "#ffffff",
+    paddingTop: 32,
+    paddingHorizontal: 16,
   },
   headerContainer: {
     borderBottomWidth: 1,
@@ -102,28 +92,78 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop:30,
   },
-  content: {
-    paddingHorizontal: 16,
-    paddingTop: 32,
+  iconContainer: {
+    position: "absolute",
+    right: 10,
+    top: -36,
   },
-  user: {
-    paddingBottom: 32,
+  userContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 23,
+    marginTop:32,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+  },
+  withoutAvatar: {
+    backgroundColor: "#F6F6F6",
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+  },
+  userName: {
+    fontFamily: "Roboto_Bold",
+    color: "#212121",
+    fontSize: 13,
+    fontStyle: "normal",
+    fontWeight: "700",
+  },
+  email: {
+    fontFamily: "Roboto_Regular",
+    color: "rgba(33, 33, 33, 0.80)",
+    fontSize: 11,
+    fontStyle: "normal",
+    fontWeight: "400",
+  },
+  publicationsContainer: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+  },
+  publicationContainer: {
+    width: "100%",
+    marginBottom: 23,
+  },
+  photo: {
+    width: "100%",
+    height: 240,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  publicationName: {
+    color: "#212121",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "500",
+    marginBottom: 10,
+  },
+  publicationDataContainer: {
     display: "flex",
     flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 35,
   },
-  avatar: {},
-  textName: {
-    fontFamily: "Roboto_Bold",
-    fontSize: 13,
-    color: "#212121",
+  publicationIconContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: 24,
   },
-  textЕmail: {
-    fontFamily: "Roboto_Regular",
-    fontSize: 11,
-    color: "rgba(33, 33, 33, 0.80)",
-  }, 
   textHeader: {
     fontFamily: "Roboto_Bold",
     fontSize: 17,
@@ -132,37 +172,63 @@ const styles = StyleSheet.create({
     paddingBottom: 11,
     
   },
-  text: {
-    fontFamily: "Roboto_Bold",
-    fontSize: 16,
+  publicationCommentContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    gap: 6,
+  },
+  count: {
     color: "#212121",
-    textAlign: "left",
-    marginTop: 8,
-  },
-  iconContainer: {
-    position: "absolute",
-    right: 10,
-    top: -36,
-  },
-  textEmpty: {
     fontFamily: "Roboto_Regular",
     fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+  },
+  iconGray: {
+    color: "#BDBDBD",
+  },
+  countZero: {
+    color: "#BDBDBD",
+  },
+  publicationLikeContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: 6,
+    alignItems: "center",
+  },
+  icon: {
+    color: "#FF6C00",
+  },
+  likeCount: {
     color: "#212121",
-    textAlign: "center",
-    marginTop: 24,
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+  },
+  publicationLocationContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    flexShrink: 1,
+    alignItems: "center",
+  },
+  iconLocation: {
+    color: "#BDBDBD",
   },
   location: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  description: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 8,
+    color: "#212121",
+    textAlign: "right",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+    textDecorationLine: "underline",
+    flexShrink: 1,
   },
 });
+
+export default PostsScreen;

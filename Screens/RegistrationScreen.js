@@ -1,56 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import RegistrationForm from "../components/RegistrationForm";
-import { Background } from "../components/Background";
+
 
 export default function RegistrationScreen() {
+
   const navigation = useNavigation();
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+
+
+  const handleRegistrationSuccess = (userData) => {
+    navigation.navigate("Posts", { userData });
+  };
+  
+  const keyboardHide = () => {
+    Keyboard.dismiss();
+    setIsShowKeyboard(false);
+  };
+
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <Background>
-          <KeyboardAvoidingView
-            behavior={Platform.OS == "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={0}
-          >
-            <View style={styles.thumb}>
-              <View style={styles.avatar}>
-                <Ionicons
-                  name="add-circle-outline"
-                  size={35}
-                  style={styles.iconAdd}
-                />
-              </View>
-              <Text style={styles.textHeader}>Реєстрація</Text>
-
-              <RegistrationForm />
-
-              <View style={styles.textDiv}>
-                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                  <Text style={[styles.textBasic, styles.textDesc]}>
-                    Вже є акаунт?
-                    <Text style={styles.textReg}> Увійти</Text>
-                  </Text>
-                </TouchableOpacity>
-              </View>
+    <TouchableWithoutFeedback onPress={keyboardHide}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS == "ios" ? "padding" : "height"}
+      style={styles.container}
+      keyboardVerticalOffset={-145}
+    >
+      <ImageBackground
+        style={styles.backgroundImage}
+        source={require("../assets/img/registration_bckg.jpg")}
+      >
+        <View style={styles.formContainer}>
+          <View style={styles.form}>
+            <RegistrationForm onRegistrationSuccess={handleRegistrationSuccess} />
+            <View style={styles.textDiv}>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+              </TouchableOpacity>
             </View>
-          </KeyboardAvoidingView>
-        </Background>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+          </View>
+        </View>
+      </ImageBackground>
+    </KeyboardAvoidingView>
+  </TouchableWithoutFeedback>
   );
 }
 
@@ -58,46 +60,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  avatar: {
-    width: 120,
-    height: 120,
-    backgroundColor: "#f6f6f6",
-    borderRadius: 16,
-    position: "absolute",
-    top: -60,
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "flex-end",
   },
-  iconAdd: {
-    color: "#FF6C00",
-    position: "absolute",
-    bottom: 12,
-    right: -18,
-  },
-  thumb: {
-    position: "relative",
-    backgroundColor: "#fff",
-    alignItems: "center",
+  formContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 45,
+    backgroundColor: "#FFF",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    paddingHorizontal: 16,
-    paddingBottom: 40,
+    justifyContent: "flex-end",
   },
-  textHeader: {
-    fontFamily: "Roboto_Bold",
-    fontSize: 30,
-    textAlign: "center",
-    marginTop: 72,
-  },
-  textBasic: {
+  
+  errorMessage: {
+    color: "#FF6C00",
     fontFamily: "Roboto_Regular",
     fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
   },
-  textDesc: {
-    color: "#1B4371",
-  },
-  textReg: {
-    marginLeft: 4,
-  },
-  textDiv: {
-    marginTop: 10,
-  },
-});
+})

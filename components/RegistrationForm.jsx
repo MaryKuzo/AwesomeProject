@@ -6,137 +6,380 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { Formik } from "formik";
+import UserPhotoCreate from "./UserPhoto";
+import { useDispatch } from "react-redux";
+import { registerUserThunk } from "../redux/auth/authOperations";
+import { userVerification } from "../firebase/index";
+import Spinner from "react-native-loading-spinner-overlay";
+
+const initialState = {
+  displayName: "",
+  email: "",
+  password: "",
+  photoURL: "",
+};
 
 export default function RegistrationForm() {
-  const [focus, setFocus] = useState("");
-  const [hidePass, setHidePass] = useState(true);
+  const [state, setState] = useState(initialState);
+  const [isLoginFocused, setLoginFocused] = useState(false);
+  const [isEmailFocused, setEmailFocused] = useState(false);
+  const [isPasswordFocused, setPasswordFocused] = useState(false);
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const [errorMessages, setErrorMessages] = useState({});
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [waitingProcess, setWaitingProcess] = useState(false);
   const navigation = useNavigation();
-  const handleRegistration = () => {
-    navigation.navigate("Home");
+  const dispatch = useDispatch();
+
+  const handlePhotoUrl = (url) => {
+    setState((prevValues) => ({
+      ...prevValues,
+      photoURL: url,
+    }));
+    // Очищаємо повідомлення про помилку
+    setErrorMessages({});
   };
 
-  return (
-    <Formik
-      initialValues={{ login: "", email: "", password: "" }}
-      onSubmit={(values, action) => {
-        console.log(values);
-        action.resetForm();
-      }}
-    >
-      {(props) => (
-        <View style={styles.form}>
-          <TextInput
-            value={props.values.login}
-            onChangeText={props.handleChange("login")}
-            placeholder="Логін"
-            placeholderTextColor={"#BDBDBD"}
-            style={[
-              styles.input,
-              styles.textBasic,
-              styles.inputFirst,
-              focus.FocusedItem === "login" && styles.inputOnFocus,
-            ]}
-            onFocus={() => setFocus({ FocusedItem: "login" })}
-            onBlur={() => setFocus({ FocusedItem: "" })}
-          />
-          <TextInput
-            value={props.values.email}
-            onChangeText={props.handleChange("email")}
-            placeholder="Адреса електронної пошти"
-            placeholderTextColor={"#BDBDBD"}
-            style={[
-              styles.input,
-              styles.textBasic,
-              focus.FocusedItem === "email" && styles.inputOnFocus,
-            ]}
-            onFocus={() => setFocus({ FocusedItem: "email" })}
-            onBlur={() => setFocus({ FocusedItem: "" })}
-          />
-          <View style={styles.thumbToShow}>
-            <TextInput
-              value={props.values.password}
-              onChangeText={props.handleChange("password")}
-              placeholder="Пароль"
-              secureTextEntry={hidePass ? true : false}
-              autoCapitalize="none"
-              placeholderTextColor={"#BDBDBD"}
-              style={[
-                styles.input,
-                styles.textBasic,
-                focus.FocusedItem === "password" && styles.inputOnFocus,
-              ]}
-              onFocus={() => setFocus({ FocusedItem: "password" })}
-              onBlur={() => setFocus({ FocusedItem: "" })}
-            />
+  const handleInputChange = (inputName, text) => {
+    setState((prevValues) => ({
+      ...prevValues,
+      [inputName]: text,
+    }));
+  };
 
-            <TouchableOpacity>
+  const handleFocus = (inputName) => {
+    if (inputName === "displayName") {
+      setLoginFocused(true);
+      setEmailFocused(false);
+      setPasswordFocused(false);
+    } else if (inputName === "email") {
+      setLoginFocused(false);
+      setEmailFocused(true);
+      setPasswordFocused(false);
+    } else if (inputName === "password") {
+      setLoginFocused(false);
+      setEmailFocused(false);
+      setPasswordFocused(true);
+    }
+  };
+
+  const handleBlur = () => {
+    setLoginFocused(false);
+    setEmailFocused(false);
+    setPasswordFocused(false);
+  };
+
+  const validateForm = async () => {
+    const errors = {};
+
+    if (!state.displayName) {
+      errors.displayName = "Логін обов'язковий";
+    }
+
+    if (!state.email) {
+      errors.email = "Електронна пошта обов'язкова";
+    } else if (!isValidEmail(state.email) || state.email.length < 5) {
+      errors.email = "Введіть дійсну електронну пошту";
+    } else {
+      const userExists = await userVerification(state.email);
+      if (userExists) {
+        errors.email = "Користувач з такою електронною адресою вже існує!";
+      }
+    }
+
+    if (!state.password) {
+      errors.password = "Пароль обов'язковий";
+    } else if (state.password.length < 6) {
+      errors.password = "Довжина паролю повинна бути не менше 6 символів!";
+    }
+
+    setErrorMessages(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const isValidEmail = (email) => {
+    const emailStandart = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailStandart.test(email);
+  };
+
+  const clearRegistrationForm = () => {
+    setState(initialState);
+  };
+
+  const handleRegistration = async () => {
+    setWaitingProcess(true);
+    try {
+      if (await validateForm()) {
+        const registrationData = {
+          displayName: state.displayName,
+          email: state.email,
+          password: state.password,
+          photoURL: state.photoURL,
+        };
+        await dispatch(registerUserThunk(registrationData));
+        clearRegistrationForm();
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
+      }
+    } catch (error) {
+      // Обробляйте помилки тут і виводьте їх у консоль або відображайте користувачу
+      console.error("Помилка при реєстрації:", error);
+      // Ви можете також показати користувачу повідомлення про помилку, наприклад, використовуючи бібліотеку `Alert`:
+      Alert.alert("Помилка при реєстрації", "Просимо спробувати ще раз.");
+    } finally {
+      setWaitingProcess(false);
+    }
+  };
+  
+
+  return (
+    <Formik>
+        <View>
+        <UserPhotoCreate handlePhotoUrl={handlePhotoUrl} />
+
+          {errorMessages.photo && (
+            <Text style={styles.errorMessagePhoto}>{errorMessages.photo}</Text>
+          )}
+          <View style={styles.form}>
+          <Text style={styles.titleEnter}>Реєстрація</Text>
+          {errorMessages.displayName && !isLoginFocused && (
+            <Text style={styles.errorMessage}>{errorMessages.displayName}</Text>
+          )}
+      
+          <TextInput
+            placeholder="Логін"
+            value={state.displayName}
+            autoComplete="username"
+            style={[
+              styles.inputLogin,
+              isLoginFocused && styles.inputFocused,
+            ]}
+            onChangeText={(text) => handleInputChange("displayName", text)}
+            onFocus={() => handleFocus("displayName")}
+            onBlur={() => handleBlur("displayName")}
+          />
+          {errorMessages.email && !isEmailFocused && (
+            <Text style={styles.errorMessage}>{errorMessages.email}</Text>
+          )}
+          <TextInput
+            placeholder="Адреса електронної пошти"
+            value={state.email}
+            autoComplete="email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            style={[
+              styles.inputEmail,
+              isEmailFocused && styles.inputFocused,
+            ]}
+            onChangeText={(text) => handleInputChange("email", text)}
+            onFocus={() => handleFocus("email")}
+            onBlur={() => handleBlur("email")}
+          />
+          {errorMessages.password && !isPasswordFocused && (
+            <Text style={styles.errorMessage}>
+              {errorMessages.password}
+            </Text>
+          )}
+          <View
+            style={[
+              styles.inputPasswordContainer,
+              isPasswordFocused && styles.inputFocused,
+            ]}
+            onFocus={() => handleFocus("password")}
+            onBlur={() => handleBlur("password")}
+          >
+            <TextInput
+              placeholder="Пароль"
+              value={state.password}
+              autoComplete="password"
+              autoCapitalize="none"
+              secureTextEntry={!isPasswordVisible}
+              style={[
+                styles.inputPassword,
+                isPasswordFocused && styles.inputFocused,
+              ]}
+              onChangeText={(text) => handleInputChange("password", text)}
+            />
+            <TouchableOpacity
+              onPress={() => setPasswordVisible(!isPasswordVisible)}
+            >
               <Text
-                style={[styles.textBasic, styles.textDesc, styles.toShow]}
-                onPress={() => setHidePass(!hidePass)}
+                style={[
+                  styles.buttonViewPassword,
+                  isPasswordFocused && styles.inputFocused,
+                ]}
               >
-                Показати
+                {isPasswordVisible ? "Приховати" : "Показати"}
               </Text>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity style={styles.button} onPress={handleRegistration}>
-            <Text style={[styles.textBasic, styles.textButton]}>
-              Зареєструватися
-            </Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              handleRegistration();
+            }}
+          >
+            <Text style={styles.buttonText}>Зареєструватися</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Login");
+            }}
+          >
+            <Text style={styles.textInfoLink}>Вже є акаунт? Увійти</Text>
+          </TouchableOpacity>
+          <Spinner
+            visible={waitingProcess}
+            textStyle={styles.spinnerTextStyle}
+            overlayColor="linear-gradient(rgba(46, 47, 66, 0.6), rgba(46, 47, 66, 0.6))"
+          />
         </View>
-      )}
+        </View>
     </Formik>
   );
 }
 
+
+
 const styles = StyleSheet.create({
   form: {
     width: "100%",
-    marginTop: 22,
+  },titleEnter: {
+    color: "#212121",
+    textAlign: "center",
+    fontFamily: "Roboto_Bold",
+    fontSize: 30,
+    fontStyle: "normal",
+    fontWeight: "500",
+    letterSpacing: 0.3,
+    marginBottom: 33,
+    marginTop: -28,
   },
-  input: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+  inputLogin: {
     width: "100%",
-    backgroundColor: "#f6f6f6",
-    borderColor: "#E8E8E8",
-    borderWidth: 1,
-    borderRadius: 10,
-    marginTop: 16,
-  },
-  inputOnFocus: {
-    backgroundColor: "#fff",
-    borderColor: "#FF6C00",
-  },
-  inputFirst: {
-    marginTop: 0,
-  },
-  textBasic: {
+    height: 50,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 15,
+    backgroundColor: "#F6F6F6",
+    color: "#212121",
     fontFamily: "Roboto_Regular",
     fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    borderRadius: 5,
+    marginBottom: 16,
+  },
+  inputEmail: {
+    width: "100%",
+    height: 50,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 15,
+    backgroundColor: "#F6F6F6",
+    color: "#212121",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    borderRadius: 5,
+    marginBottom: 16,
+  },
+  inputFocused: {
+    borderColor: "#FF6C00",
+    backgroundColor: "#FFF",
+  },
+  inputPasswordContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    borderRadius: 5,
+    height: 50,
+    marginBottom: 43,
+    backgroundColor: "#F6F6F6",
+  },
+  inputPassword: {
+    height: 50,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 15,
+    backgroundColor: "#F6F6F6",
+    color: "#212121",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    borderRightWidth: 0,
+    borderRadius: 5,
+  },
+  buttonViewPassword: {
+    paddingHorizontal: 10,
+    backgroundColor: "#F6F6F6",
+    color: "#1B4371",
+    textAlign: "right",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontWeight: "400",
   },
   button: {
-    paddingVertical: 10,
+    display: "flex",
+    width: "100%",
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 12,
     borderRadius: 100,
     backgroundColor: "#FF6C00",
-    marginTop: 35,
+    marginBottom: 16,
   },
-  textButton: {
-    color: "#ffffff",
+  buttonText: {
+    color: "#FFF",
     textAlign: "center",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
   },
-  textDesc: {
+  textInfoLink: {
     color: "#1B4371",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+    textDecorationLine: "underline",
+    textDecorationColor: "#1B4371",
+    textAlign: "center"
   },
-  thumbToShow: {
-    position: "relative",
+  errorMessage: {
+    color: "#FF6C00",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
   },
-  toShow: {
-    position: "absolute",
-    top: -33,
-    right: 16,
+  errorMessagePhoto: {
+    color: "#FF6C00",
+    fontFamily: "Roboto_Regular",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "400",
+    alignSelf: "center",
+    top: -50,
   },
 });

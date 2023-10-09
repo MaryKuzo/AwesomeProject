@@ -1,64 +1,42 @@
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Dimensions } from "react-native";
+import MapView, { PROVIDER_GOOGLE, Marker } from "react-native-maps";
+import * as Location from "expo-location";
 
-async function getGeolocationByAddress(address) {
-  try {
-    const response = await axios.get(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        address
-      )}`
-    );
-    if (response.data && response.data.length > 0) {
-      const firstResult = response.data[0];
-      const latitude = parseFloat(firstResult.lat);
-      const longitude = parseFloat(firstResult.lon);
-      return { latitude, longitude };
-    }
-  } catch (error) {
-    console.error("Помилка при отриманні геолокації:", error);
-    return null;
-  }
-}
-
-const MapScreen = ({ route }) => {
-  console.log("route", route.params.location);
-  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+const MapScreen = () => {
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
-    const locationString = route.params.location;
-    // const locationString = "Київ,вулиця Юлії Здановської";
-    getGeolocationByAddress(locationString).then((location) => {
-      if (location) {
-        console.log("Широта:", location.latitude);
-        console.log("Довгота:", location.longitude);
-        setLocation(location);
-      } else {
-        console.log("Не вдалося отримати геолокацію за адресою.");
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("У доступі до місцезнаходження відмовлено");
       }
-    });
+
+      let location = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setLocation(coords);
+    })();
   }, []);
 
   return (
     <View style={styles.container}>
       <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: location.latitude,
-          longitude: location.longitude,
+        style={styles.mapStyle}
+        provider={PROVIDER_GOOGLE}
+        region={{
+          ...location,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
+        showsUserLocation={true}
       >
-        <Marker
-          coordinate={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-          }}
-          title="Місце"
-          description="Опис місця"
-        />
+        {location && (
+          <Marker title="I am here" coordinate={location} description="Hello" />
+        )}
       </MapView>
     </View>
   );
@@ -67,9 +45,14 @@ const MapScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 85,
   },
-  map: {
-    flex: 1,
+  mapStyle: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
   },
 });
 
