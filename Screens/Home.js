@@ -19,14 +19,14 @@ const Home = () => {
 
           if (route.name === "Posts") {
             iconName = focused ? "ios-grid" : "ios-grid-outline";
-            color = "rgba(33, 33, 33, 0.80)";
+            color = focused ?  "#FF6C00" : 'rgba(33, 33, 33, 0.80)';
           } else if (route.name === "Create") {
             iconName = focused ? "ios-add-outline" : "ios-add";
             color = focused ? 'white' : 'rgba(33, 33, 33, 0.80)';
             backgroundColor = focused ? "#FF6C00" : "rgba(33, 33, 33, 0.80)";
           } else if (route.name === "Profile") {
              iconName = focused ? "ios-person-sharp" : "ios-person-outline";
-             color =  "rgba(33, 33, 33, 0.80)";
+             color = focused ?  "#FF6C00" : 'rgba(33, 33, 33, 0.80)';
           }
           return <Ionicons name={iconName} size={24} color={color} />;
         },

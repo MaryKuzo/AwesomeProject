@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { Formik } from "formik";
-import UserPhotoCreate from "./UserPhoto";
+import UserPhotoCreate from "./UserPhotoCreate";
 import { useDispatch } from "react-redux";
 import { registerUserThunk } from "../redux/auth/authOperations";
 import { userVerification } from "../firebase/index";
@@ -39,9 +39,8 @@ export default function RegistrationForm() {
       ...prevValues,
       photoURL: url,
     }));
-    // Очищаємо повідомлення про помилку
-    setErrorMessages({});
   };
+  
 
   const handleInputChange = (inputName, text) => {
     setState((prevValues) => ({
@@ -142,10 +141,11 @@ export default function RegistrationForm() {
     <Formik>
         <View>
         <UserPhotoCreate handlePhotoUrl={handlePhotoUrl} />
-
-          {errorMessages.photo && (
-            <Text style={styles.errorMessagePhoto}>{errorMessages.photo}</Text>
-          )}
+            {errorMessages.photo && (
+              <Text style={styles.errorMessagePhoto}>
+                {errorMessages.photo}
+              </Text>
+            )}
           <View style={styles.form}>
           <Text style={styles.titleEnter}>Реєстрація</Text>
           {errorMessages.displayName && !isLoginFocused && (
