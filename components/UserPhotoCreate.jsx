@@ -9,17 +9,9 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { photoUserOptimization } from "../helpers/index";
-import { useUser } from "../hooks/index";
-import { useDispatch } from "react-redux";
-import {
-  addPhotoUserThunk,
-  deletePhotoUserThunk,
-} from "../redux/auth/authOperations";
 
-const UserPhoto = () => {
+const UserPhotoCreate = ({ handlePhotoUrl }) => {
   const [image, setImage] = useState("");
-  const { user } = useUser();
-  const dispatch = useDispatch();
 
   const selectImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -35,8 +27,7 @@ const UserPhoto = () => {
       const firstAsset = result.assets[0];
       const optimizedUri = await photoUserOptimization(firstAsset.uri);
       setImage(optimizedUri);
-      user.photoURL = optimizedUri;
-      dispatch(addPhotoUserThunk(optimizedUri));
+      handlePhotoUrl(optimizedUri);
     }
   };
 
@@ -59,8 +50,7 @@ const UserPhoto = () => {
       const firstAsset = result.assets[0];
       const optimizedUri = await photoUserOptimization(firstAsset.uri);
       setImage(optimizedUri);
-      user.photoURL = optimizedUri;
-      dispatch(addPhotoUserThunk(optimizedUri));
+      handlePhotoUrl(optimizedUri);
     }
   };
 
@@ -78,25 +68,18 @@ const UserPhoto = () => {
   };
 
   const clearPhotoUser = () => {
-    if (user && user.photoURL) {
-      dispatch(deletePhotoUserThunk());
-      setImage("");
-      user.photoURL = "";
-    }
+    setImage("");
   };
 
   return (
     <View style={styles.avatarContainer}>
-      {image || (user && user.photoURL) ? (
+      {image ? (
         <TouchableOpacity
           onPress={() => {
             clearPhotoUser();
           }}
         >
-          <ImageBackground
-            source={user.photoURL ? { uri: user.photoURL } : { uri: image }}
-            style={styles.avatar}
-          >
+          <ImageBackground source={{ uri: image }} style={styles.avatar}>
             <AntDesign
               style={styles.iconWithPhoto}
               name="closecircleo"
@@ -153,4 +136,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserPhoto;
+export default UserPhotoCreate;

@@ -1,25 +1,36 @@
-import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ImageBackground,
-  Text,
-  SafeAreaView,
-} from "react-native";
-
-import UserPhoto from "../components/UserPhoto";
-import { useDispatch } from "react-redux";
+import React from "react";
+import { View, StyleSheet, ImageBackground, Text, SafeAreaView } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import { useUser } from "../hooks/index.js";
-
+import { AntDesign } from "@expo/vector-icons";
 import ButtonLogOut from "../components/ButtonLogOut";
-import ProfilePosts from '../components/ProfilePosts.jsx'
+import ProfilePosts from '../components/ProfilePosts.jsx';
+import UserPhoto from "../components/UserPhoto.jsx";
+import { useNavigation } from '@react-navigation/native';
+import {
+  deletePhotoUserThunk,
+  updateUser,
+} from "../redux/auth/authOperations";
 
 const ProfileScreen = () => {
-  const [update, setUpdate] = useState(false);
   const { user } = useUser();
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
-  return (
+  const clearPhotoUser = () => {
+    if (user) {
+      dispatch(deletePhotoUserThunk())
+        .then(() => {
+          const updatedUser = { ...user, photoURL: '' };
+          dispatch(updateUser(updatedUser));
+        })
+        .catch((error) => {
+          console.error('Error deleting user photo: ', error);
+        });
+    }
+  };
+
+  return  (
     <View style={styles.container}>
       <ImageBackground
         style={styles.backgroundImage}
@@ -32,7 +43,7 @@ const ProfileScreen = () => {
               <ButtonLogOut />
             </View>
             {user && <Text style={styles.name}>{user.displayName}</Text>}
-            <ProfilePosts/>
+            <ProfilePosts />
           </View>
         </SafeAreaView>
       </ImageBackground>
@@ -44,6 +55,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
+  },
+  avatarContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    top: -60,
+    borderRadius: 20,
+  },
+  withoutAvatar: {
+    width: 120,
+    height: 120,
+    top: -60,
+    borderRadius: 20,
+    backgroundColor: "#F6F6F6",
+  },
+  iconWithPhoto: {
+    left: 108,
+    top: 76,
+    color: "#BDBDBD",
+  },
+  iconWithoutPhoto: {
+    left: 108,
+    top: 76,
+    color: "#FF6C00",
+  },
+
+  userContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 23,
+    marginTop:32,
   },
   backgroundImage: {
     flex: 1,
